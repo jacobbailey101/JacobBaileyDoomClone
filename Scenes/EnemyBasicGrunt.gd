@@ -10,6 +10,11 @@ var health = 20
 var move = true
 
 var searching = false
+var shooting = false
+var dead = false
+
+var damage = 8
+
 onready var ray = $Visual
 
 func _ready():
@@ -26,8 +31,10 @@ func take_damage(dmg_amount):
 	move = true
 	
 func _physics_process(delta):
+	if dead:
+		return
 	look_at_player()
-	if searching:
+	if searching and not shooting:
 		if path_index < path.size():
 			var direction = (path[path_index] - global_transform.origin)
 			if direction.length() < 1:
@@ -37,7 +44,8 @@ func _physics_process(delta):
 					$AnimatedSprite3D.play("walking")
 					move_and_slide(direction.normalized() * speed, Vector3.UP)
 	else:
-		$AnimatedSprite3D.play("idle")
+		if not shooting:
+			$AnimatedSprite3D.play("idle")
 		
 	
 func look_at_player():
@@ -60,16 +68,25 @@ func find_path(target):
 	path_index = 0
 	
 func death():
-	set_process(false)
-	set_physics_process(false)
+	dead = true
+	#set_process(false)
+	#set_physics_process(false)
 	$CollisionShape.disabled = true
 	if health < -20:
 		$AnimatedSprite3D.play("explode")
 	else:
 		$AnimatedSprite3D.play("die")
 	
-func shoot(target):
-	pass
+func shoot():
+	if searching and not dead and not shooting:
+		$AnimatedSprite3D.play("shoot")
+		shooting = true
+		yield($AnimatedSprite3D,"frame_changed")
+		if ray.is_colliding():
+			if ray.get_collider().is_in_group("Player"):
+				PlayerStats.change_health(-damage)
+		yield($AnimatedSprite3D,"animation_finished")
+		shooting = false
 	
 
 
@@ -81,3 +98,7 @@ func _on_Aural_body_entered(body):
 	if body.is_in_group("Player"):
 		print("I hear you")
 		searching = true
+
+
+func _on_ShootTimer_timeout():
+	shoot() # Replace with function body.
