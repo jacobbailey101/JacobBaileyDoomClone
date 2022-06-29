@@ -1,0 +1,18 @@
+[gd_scene format=2]
+
+[node name="Level 1" type="Spatial"]
+
+[node name="Navigation" type="Navigation" parent="."]
+
+[node name="NavigationMeshInstance" type="NavigationMeshInstance" parent="Navigation"]
+
+[node name="Floor" type="CSGBox" parent="Navigation/NavigationMeshInstance"]
+width = 24.0
+height = 1.0
+depth = 25.5
+
+[node name="CSGBox" type="CSGBox" parent="Navigation/NavigationMeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 3.5, 0 )
+width = 1.0
+height = 6.0
+depth = 25.5
